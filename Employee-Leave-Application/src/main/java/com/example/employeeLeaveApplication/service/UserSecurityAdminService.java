@@ -13,6 +13,11 @@ public class UserSecurityAdminService {
         this.repository = repository;
     }
 
+    // 🔹 Add this method to find by userId
+    public UserSecurityAdmin findByUserId(Long userId) {
+        return repository.findByUserId(userId).orElse(null);
+    }
+
     public UserSecurityAdmin save(UserSecurityAdmin userSecurityAdmin) {
         return repository.save(userSecurityAdmin);
     }

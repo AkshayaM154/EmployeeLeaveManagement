@@ -3,6 +3,7 @@ package com.example.employeeLeaveApplication.entity;
 import com.example.employeeLeaveApplication.enums.HalfDayType;
 import com.example.employeeLeaveApplication.enums.LeaveStatus;
 import com.example.employeeLeaveApplication.enums.LeaveType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.antlr.v4.runtime.misc.NotNull;
 
@@ -25,7 +26,6 @@ public class LeaveApplication {
 
     @Column(name = "lop_month")
     private Integer month;
-
 
     @Enumerated(EnumType.STRING)
     private LeaveType leaveType;
@@ -54,12 +54,18 @@ public class LeaveApplication {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-
+    // ==========================
+    // Lazy-safe JSON: ignore the back-reference
+    // ==========================
     @OneToMany(mappedBy = "leaveApplication",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
+    @JsonIgnoreProperties("leaveApplication")
     private List<LeaveAttachment> attachments = new ArrayList<>();
 
+    // ==========================
+    // Auto-populate createdAt and year
+    // ==========================
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
@@ -73,101 +79,42 @@ public class LeaveApplication {
         }
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    // ==========================
+    // GETTERS & SETTERS
+    // ==========================
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-    public List<LeaveAttachment> getAttachments() {
-        return attachments;
-    }
+    public Long getEmployeeId() { return employeeId; }
+    public void setEmployeeId(Long employeeId) { this.employeeId = employeeId; }
 
-    public void setAttachments(List<LeaveAttachment> attachments) {
-        this.attachments = attachments;
-    }
+    public LeaveType getLeaveType() { return leaveType; }
+    public void setLeaveType(LeaveType leaveType) { this.leaveType = leaveType; }
 
-    public Long getId() {
-        return id;
-    }
+    public HalfDayType getHalfDayType() { return halfDayType; }
+    public void setHalfDayType(HalfDayType halfDayType) { this.halfDayType = halfDayType; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
 
-    public Long getEmployeeId() {
-        return employeeId;
-    }
+    public LocalDate getEndDate() { return endDate; }
+    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
-    }
+    public BigDecimal getDays() { return days; }
+    public void setDays(BigDecimal days) { this.days = days; }
 
-    public LeaveType getLeaveType() {
-        return leaveType;
-    }
+    public LeaveStatus getStatus() { return status; }
+    public void setStatus(LeaveStatus status) { this.status = status; }
 
-    public void setLeaveType(LeaveType leaveType) {
-        this.leaveType = leaveType;
-    }
+    public String getReason() { return reason; }
+    public void setReason(String reason) { this.reason = reason; }
 
-    public HalfDayType getHalfDayType() {
-        return halfDayType;
-    }
+    public Integer getYear() { return year; }
+    public void setYear(Integer year) { this.year = year; }
 
-    public void setHalfDayType(HalfDayType halfDayType) {
-        this.halfDayType = halfDayType;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public BigDecimal getDays() {
-        return days;
-    }
-
-    public void setDays(BigDecimal days) {
-        this.days = days;
-    }
-
-    public LeaveStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(LeaveStatus status) {
-        this.status = status;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
+    public List<LeaveAttachment> getAttachments() { return attachments; }
+    public void setAttachments(List<LeaveAttachment> attachments) { this.attachments = attachments; }
 }
-
-
-

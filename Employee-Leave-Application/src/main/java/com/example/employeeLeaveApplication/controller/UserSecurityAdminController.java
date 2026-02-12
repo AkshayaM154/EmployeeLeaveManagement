@@ -16,8 +16,23 @@ public class UserSecurityAdminController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<String> saveSecurity(@RequestBody UserSecurityAdmin security) {
-        service.save(security);
-        return ResponseEntity.ok("Admin security details saved successfully");
+    public ResponseEntity<String> updateSecurity(@RequestBody UserSecurityAdmin security) {
+
+        // 🔹 Check if record exists for this userId
+        UserSecurityAdmin existing = service.findByUserId(security.getUserId());
+
+        if (existing == null) {
+            // 🔹 Stop gracefully if user does not exist
+            return ResponseEntity.ok(
+                    "No record found for userId " + security.getUserId() + ". Update skipped."
+            );
+        }
+
+        // 🔹 Update existing record
+        existing.setVpnEnabled(security.getVpnEnabled());
+        existing.setBiometricRegistered(security.getBiometricRegistered());
+        service.save(existing);
+
+        return ResponseEntity.ok("Admin security details updated successfully");
     }
 }

@@ -1,4 +1,4 @@
-package com.example.notificationservice.config;
+package com.example.employeeLeaveApplication.config;
 
 import org.h2.server.web.JakartaWebServlet;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;

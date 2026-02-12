@@ -6,7 +6,6 @@ import com.example.employeeLeaveApplication.entity.CompOff;
 import com.example.employeeLeaveApplication.entity.Employee;
 import com.example.employeeLeaveApplication.entity.LeaveApplication;
 import com.example.employeeLeaveApplication.enums.*;
-import com.example.employeeLeaveApplication.exceptions.BadRequestException;
 import com.example.employeeLeaveApplication.repository.CompOffRepository;
 import com.example.employeeLeaveApplication.repository.EmployeeRepository;
 import com.example.employeeLeaveApplication.repository.LeaveApplicationRepository;
@@ -49,16 +48,41 @@ public class LeaveApplicationService {
     @Transactional
     public LeaveResponse applyLeave(LeaveApplication leave, boolean confirmLossOfPay) {
 
+        // 0️⃣ Check if employee exists
+        Employee employee = employeeRepository.findById(leave.getEmployeeId()).orElse(null);
+        if (employee == null) {
+            return new LeaveResponse(null,
+                    "Employee with ID " + leave.getEmployeeId() + " does not exist. Leave not applied."
+            );
+        }
+
+
         // 1️⃣ Validate dates
         if (leave.getEndDate().isBefore(leave.getStartDate())) {
-            throw new BadRequestException("End date cannot be before start date");
+            return new LeaveResponse(null, "End date cannot be before start date");
         }
 
         // 2️⃣ Check for overlapping leaves
-        checkLeaveOverlap(leave);
+        List<LeaveApplication> overlaps =
+                leaveApplicationRepository.findOverlappingLeaves(
+                        leave.getEmployeeId(),
+                        leave.getStartDate(),
+                        leave.getEndDate(),
+                        LeaveStatus.PENDING,
+                        LeaveStatus.APPROVED
+                );
+
+        if (!overlaps.isEmpty()) {
+            return new LeaveResponse(null, "Leave dates overlap with an existing leave");
+        }
 
         // 3️⃣ Calculate leave days (with half-day support)
-        BigDecimal calculatedDays = calculateLeaveDuration(leave);
+        BigDecimal calculatedDays;
+        try {
+            calculatedDays = calculateLeaveDuration(leave);
+        } catch (Exception e) {
+            return new LeaveResponse(null, e.getMessage());
+        }
 
         // 4️⃣ Check leave balance
         String warning = checkBalanceAndGetWarning(leave, calculatedDays);
@@ -88,15 +112,15 @@ public class LeaveApplicationService {
         // 9️⃣ Notify next approver safely
         notifyNextApproverSafe(savedLeave);
 
-        return new LeaveResponse(savedLeave, null);
+        return new LeaveResponse(savedLeave, warning);
     }
 
     // =========================================================
     // SAFE ROLE-BASED NOTIFICATIONS
     // =========================================================
     private void notifyNextApproverSafe(LeaveApplication leave) {
-        Employee applicant = employeeRepository.findById(leave.getEmployeeId())
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        Employee applicant = employeeRepository.findById(leave.getEmployeeId()).orElse(null);
+        if (applicant == null) return;
 
         Employee nextApprover = null;
 
@@ -125,55 +149,35 @@ public class LeaveApplicationService {
     }
 
     // =========================================================
-    // CHECK FOR OVERLAPPING LEAVES
-    // =========================================================
-    private void checkLeaveOverlap(LeaveApplication leave) {
-        List<LeaveApplication> overlaps =
-                leaveApplicationRepository.findOverlappingLeaves(
-                        leave.getEmployeeId(),
-                        leave.getStartDate(),
-                        leave.getEndDate(),
-                        LeaveStatus.PENDING,
-                        LeaveStatus.APPROVED
-                );
-
-        if (!overlaps.isEmpty()) {
-            throw new BadRequestException("Leave dates overlap with an existing leave");
-        }
-    }
-
-    public List<LeaveApplication> getLeavesByEmployee(Long employeeId) {
-        return leaveApplicationRepository.findByEmployeeId(employeeId);
-    }
-
-    // =========================================================
-    // CANCELLATION
+    // CANCEL LEAVES (Employee/Admin)
     // =========================================================
     @Transactional
-    public void cancelAdminLeave(Long applicationId) {
-        LeaveApplication leave = leaveApplicationRepository.findById(applicationId)
-                .orElseThrow(() -> new BadRequestException("Leave not found"));
+    public LeaveResponse cancelAdminLeave(Long applicationId) {
+        LeaveApplication leave = leaveApplicationRepository.findById(applicationId).orElse(null);
+        if (leave == null) return new LeaveResponse(null, "Leave not found. Cancellation skipped.");
         performCancellation(leave);
+        return new LeaveResponse(leave, "Leave cancelled successfully");
     }
 
     @Transactional
-    public void cancelEmployeeLeave(Long applicationId, Long employeeId) {
-        LeaveApplication leave = leaveApplicationRepository.findById(applicationId)
-                .orElseThrow(() -> new BadRequestException("Leave not found"));
+    public LeaveResponse cancelEmployeeLeave(Long applicationId, Long employeeId) {
+        LeaveApplication leave = leaveApplicationRepository.findById(applicationId).orElse(null);
+        if (leave == null) return new LeaveResponse(null, "Leave not found. Cancellation skipped.");
 
         if (!leave.getEmployeeId().equals(employeeId)) {
-            throw new BadRequestException("Unauthorized cancellation");
+            return new LeaveResponse(null, "Unauthorized cancellation. Skipped.");
         }
 
         if (leave.getStatus() == LeaveStatus.REJECTED || leave.getStatus() == LeaveStatus.CANCELLED) {
-            throw new BadRequestException("Leave already finalized");
+            return new LeaveResponse(null, "Leave already finalized. Skipped.");
         }
 
         if (leave.getStatus() == LeaveStatus.APPROVED) {
-            throw new BadRequestException("Approved leaves cannot be cancelled");
+            return new LeaveResponse(null, "Approved leaves cannot be cancelled.");
         }
 
         performCancellation(leave);
+        return new LeaveResponse(leave, "Leave cancelled successfully");
     }
 
     private void performCancellation(LeaveApplication leave) {
@@ -210,7 +214,6 @@ public class LeaveApplicationService {
     private void processAttachments(LeaveApplication leave) {
         if (leave.getAttachments() != null) {
             leave.getAttachments().forEach(a -> {
-                // Only store the filename, no IP or port
                 a.setFileUrl(a.getFileUrl());
                 a.setLeaveApplication(leave);
             });
@@ -229,18 +232,21 @@ public class LeaveApplicationService {
         }
 
         if (total.compareTo(BigDecimal.ZERO) == 0) {
-            throw new BadRequestException("All days are non-working");
+            throw new RuntimeException("All days are non-working");
         }
 
         return total;
     }
 
-    // Helper for half-day logic
     private BigDecimal getLeaveDayIncrement(LeaveApplication leave, LocalDate date) {
         if (leave.getLeaveType() == LeaveType.HALF_DAY ||
                 (leave.getHalfDayType() != null && date.equals(leave.getEndDate()))) {
             return new BigDecimal("0.5");
         }
         return BigDecimal.ONE;
+    }
+
+    public List<LeaveApplication> getLeavesByEmployee(Long employeeId) {
+        return leaveApplicationRepository.findByEmployeeId(employeeId);
     }
 }

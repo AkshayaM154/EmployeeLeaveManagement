@@ -1,7 +1,6 @@
 package com.example.employeeLeaveApplication.controller;
 
 import com.example.employeeLeaveApplication.dto.LeaveResponse;
-import com.example.employeeLeaveApplication.entity.LeaveAllocation;
 import com.example.employeeLeaveApplication.entity.LeaveApplication;
 import com.example.employeeLeaveApplication.entity.LeaveAttachment;
 import com.example.employeeLeaveApplication.enums.HalfDayType;
@@ -11,7 +10,6 @@ import com.example.employeeLeaveApplication.service.LeaveApplicationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -38,13 +36,16 @@ public class LeaveApplicationController {
 
     public LeaveApplicationController(LeaveApplicationService leaveApplicationService,
                                       LeaveAllocationService leaveAllocationService){
-        this.leaveApplicationService=leaveApplicationService;
-        this.leaveAllocationService=leaveAllocationService;
+        this.leaveApplicationService = leaveApplicationService;
+        this.leaveAllocationService = leaveAllocationService;
     }
 
     @Value("${file.upload-dir:uploads/leaves}")
     private String uploadDir;
 
+    // ========================
+    // APPLY LEAVE
+    // ========================
     @PostMapping(value = "/apply", consumes = "multipart/form-data")
     public LeaveResponse applyLeave(
             @RequestParam Long employeeId,
@@ -77,6 +78,7 @@ public class LeaveApplicationController {
             leave.setHalfDayType(HalfDayType.valueOf(halfDayType.toUpperCase()));
         }
 
+        // Process attachments
         if (files != null && files.length > 0) {
             Path uploadPath = Paths.get(uploadDir);
             Files.createDirectories(uploadPath);
@@ -91,7 +93,6 @@ public class LeaveApplicationController {
                 String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
                 Files.write(uploadPath.resolve(uniqueName), file.getBytes());
 
-                // FIX: Store the URL with %20 instead of spaces
                 String encodedName = URLEncoder.encode(uniqueName, StandardCharsets.UTF_8).replace("+", "%20");
                 String fullUrl = String.format("http://%s:%d/api/files/download/%s", hostname, port, encodedName);
 
@@ -105,15 +106,38 @@ public class LeaveApplicationController {
 
         LeaveResponse response = leaveApplicationService.applyLeave(leave, confirmLossOfPay);
 
+        // Avoid recursive reference in JSON
         if (response.getLeaveApplication() != null && response.getLeaveApplication().getAttachments() != null) {
             response.getLeaveApplication().getAttachments().forEach(a -> a.setLeaveApplication(null));
         }
         return response;
     }
 
+    // ========================
+    // GET LEAVES FOR EMPLOYEE
+    // ========================
     @GetMapping("/employee/{employeeId}")
     public List<LeaveApplication> getEmployeeLeaves(@PathVariable Long employeeId) {
         return leaveApplicationService.getLeavesByEmployee(employeeId);
+    }
+
+    // ========================
+    // CANCEL LEAVE (EMPLOYEE)
+    // ========================
+    @PostMapping("/cancel/employee")
+    public LeaveResponse cancelEmployeeLeave(
+            @RequestParam Long applicationId,
+            @RequestParam Long employeeId
+    ) {
+        return leaveApplicationService.cancelEmployeeLeave(applicationId, employeeId);
+    }
+
+    // ========================
+    // CANCEL LEAVE (ADMIN)
+    // ========================
+    @PostMapping("/cancel/admin")
+    public LeaveResponse cancelAdminLeave(@RequestParam Long applicationId) {
+        return leaveApplicationService.cancelAdminLeave(applicationId);
     }
 
 }
