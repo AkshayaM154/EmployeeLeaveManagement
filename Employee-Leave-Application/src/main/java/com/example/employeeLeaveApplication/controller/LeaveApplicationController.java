@@ -71,7 +71,7 @@ public class LeaveApplicationController {
         leave.setStartDate(startDate);
         leave.setEndDate(endDate);
         leave.setReason(reason);
-        leave.setStatus(com.example.notificationservice.enums.LeaveStatus.PENDING);
+        leave.setStatus(com.example.employeeLeaveApplication.enums.LeaveStatus.PENDING);
 
         if (halfDayType != null && !halfDayType.isEmpty()) {
             leave.setHalfDayType(HalfDayType.valueOf(halfDayType.toUpperCase()));

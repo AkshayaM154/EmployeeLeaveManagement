@@ -1,14 +1,12 @@
 package com.example.employeeLeaveApplication.dto;
 
-<<<<<<< HEAD:Employee-Leave-Application/src/main/java/com/example/notificationservice/dto/NotificationResponse.java
-import com.example.notificationservice.enums.Channel;
-import com.example.notificationservice.enums.EventType;
-import com.example.notificationservice.enums.NotificationStatus;
-=======
+//import com.example.notificationservice.enums.Channel;
+//import com.example.notificationservice.enums.EventType;
+//import com.example.notificationservice.enums.NotificationStatus;
+
 import com.example.employeeLeaveApplication.enums.Channel;
 import com.example.employeeLeaveApplication.enums.EventType;
 import com.example.employeeLeaveApplication.enums.NotificationStatus;
->>>>>>> origin/dev:Employee-Leave-Application/src/main/java/com/example/employeeLeaveApplication/dto/NotificationResponse.java
 
 import java.time.LocalDateTime;
 

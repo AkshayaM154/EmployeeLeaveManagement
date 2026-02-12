@@ -1,11 +1,10 @@
 package com.example.employeeLeaveApplication.repository;
 
-<<<<<<< HEAD:Employee-Leave-Application/src/main/java/com/example/notificationservice/repository/EmployeeRepository.java
-import com.example.notificationservice.entity.Employee;
-import com.example.notificationservice.enums.Role;
-=======
+//import com.example.notificationservice.entity.Employee;
+//import com.example.notificationservice.enums.Role;
+
 import com.example.employeeLeaveApplication.entity.Employee;
->>>>>>> origin/dev:Employee-Leave-Application/src/main/java/com/example/employeeLeaveApplication/repository/EmployeeRepository.java
+import com.example.employeeLeaveApplication.enums.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

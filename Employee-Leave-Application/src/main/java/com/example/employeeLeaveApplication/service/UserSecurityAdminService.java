@@ -1,7 +1,7 @@
-package com.example.notificationservice.service;
+package com.example.employeeLeaveApplication.service;
 
-import com.example.notificationservice.entity.UserSecurityAdmin;
-import com.example.notificationservice.repository.UserSecurityAdminRepository;
+import com.example.employeeLeaveApplication.entity.UserSecurityAdmin;
+import com.example.employeeLeaveApplication.repository.UserSecurityAdminRepository;
 import org.springframework.stereotype.Service;
 
 @Service

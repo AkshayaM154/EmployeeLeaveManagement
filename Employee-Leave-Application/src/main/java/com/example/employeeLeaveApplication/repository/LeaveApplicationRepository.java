@@ -18,16 +18,12 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
 
     List<LeaveApplication> findByEmployeeId(Long employeeId);
 
-<<<<<<< HEAD:Employee-Leave-Application/src/main/java/com/example/notificationservice/repository/LeaveApplicationRepository.java
-    List<LeaveApplication> findByEmployeeIdInAndStatus(List<Long> employeeIds, LeaveStatus status);
-=======
+
     List<LeaveApplication> findByEmployeeIdInAndStatus(
             List<Long> employeeIds,
             LeaveStatus status
     );
     List<LeaveApplication> findByStatus(LeaveStatus status);
-
->>>>>>> origin/dev:Employee-Leave-Application/src/main/java/com/example/employeeLeaveApplication/repository/LeaveApplicationRepository.java
 
     @Query("""
         SELECT COUNT(l)

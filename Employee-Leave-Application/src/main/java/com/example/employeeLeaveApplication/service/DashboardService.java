@@ -1,16 +1,14 @@
 package com.example.employeeLeaveApplication.service;
 
-<<<<<<< HEAD:Employee-Leave-Application/src/main/java/com/example/notificationservice/service/DashboardService.java
-import com.example.notificationservice.dto.EmployeeDashboardResponse;
-import com.example.notificationservice.dto.LeaveBalanceResponse;
-import com.example.notificationservice.dto.MonthlyStatsResponse;
-import com.example.notificationservice.dto.TeamMemberBalance;
-import com.example.notificationservice.entity.Employee;
-import com.example.notificationservice.entity.LeaveApplication;
-import com.example.notificationservice.enums.LeaveStatus;
-import com.example.notificationservice.repository.EmployeeRepository;
-import com.example.notificationservice.repository.LeaveApplicationRepository;
-=======
+//import com.example.notificationservice.dto.EmployeeDashboardResponse;
+//import com.example.notificationservice.dto.LeaveBalanceResponse;
+//import com.example.notificationservice.dto.MonthlyStatsResponse;
+//import com.example.notificationservice.dto.TeamMemberBalance;
+//import com.example.notificationservice.entity.Employee;
+//import com.example.notificationservice.entity.LeaveApplication;
+//import com.example.notificationservice.enums.LeaveStatus;
+//import com.example.notificationservice.repository.EmployeeRepository;
+//import com.example.notificationservice.repository.LeaveApplicationRepository;
 import com.example.employeeLeaveApplication.dto.EmployeeDashboardResponse;
 
 import com.example.employeeLeaveApplication.dto.LeaveBalanceResponse;
@@ -25,7 +23,6 @@ import com.example.employeeLeaveApplication.repository.EmployeeRepository;
 import com.example.employeeLeaveApplication.repository.LeaveApplicationRepository;
 
 
->>>>>>> origin/dev:Employee-Leave-Application/src/main/java/com/example/employeeLeaveApplication/service/DashboardService.java
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

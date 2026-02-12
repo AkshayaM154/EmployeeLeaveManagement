@@ -1,7 +1,8 @@
-package com.example.notificationservice.controller;
-
-import com.example.notificationservice.entity.LeaveAttachment;
-import com.example.notificationservice.repository.LeaveAttachmentRepository;
+package com.example.employeeLeaveApplication.controller;
+//import com.example.notificationservice.entity.LeaveAttachment;
+//import com.example.notificationservice.repository.LeaveAttachmentRepository;
+import com.example.employeeLeaveApplication.entity.LeaveAttachment;
+import com.example.employeeLeaveApplication.repository.LeaveAttachmentRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;

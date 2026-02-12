@@ -1,7 +1,7 @@
-package com.example.notificationservice.controller;
+package com.example.employeeLeaveApplication.controller;
 
-import com.example.notificationservice.entity.UserSecurityAdmin;
-import com.example.notificationservice.service.UserSecurityAdminService;
+import com.example.employeeLeaveApplication.entity.UserSecurityAdmin;
+import com.example.employeeLeaveApplication.service.UserSecurityAdminService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
