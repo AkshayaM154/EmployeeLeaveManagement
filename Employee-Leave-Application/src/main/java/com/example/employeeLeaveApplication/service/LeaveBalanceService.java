@@ -2,10 +2,11 @@ package com.example.employeeLeaveApplication.service;
 
 
 import com.example.employeeLeaveApplication.repository.EmployeeRepository;
-import com.example.employeeLeaveApplication.repository.LeaveApplicationRepository;
 import com.example.employeeLeaveApplication.repository.LossOfPayRecordRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.employeeLeaveApplication.repository.LeaveApplicationRepository;
+
 
 import com.example.employeeLeaveApplication.dto.LeaveBalanceResponse;
 import com.example.employeeLeaveApplication.dto.LeaveTypeBreakdown;

@@ -1,23 +1,21 @@
 package com.example.employeeLeaveApplication.dto;
 
-import com.example.employeeLeaveApplication.entity.LeaveApplication;
-
 public class LeaveResponse {
 
-    private LeaveApplication leaveApplication;
+    private LeaveApplicationDTO leave;
     private String warning;
 
-    public LeaveResponse(LeaveApplication leaveApplication, String warning) {
-        this.leaveApplication = leaveApplication;
+    public LeaveResponse(LeaveApplicationDTO leave, String warning) {
+        this.leave = leave;
         this.warning = warning;
     }
 
-    public LeaveApplication getLeaveApplication() {
-        return leaveApplication;
+    public LeaveApplicationDTO getLeave() {
+        return leave;
     }
 
-    public void setLeaveApplication(LeaveApplication leaveApplication) {
-        this.leaveApplication = leaveApplication;
+    public void setLeave(LeaveApplicationDTO leave) {
+        this.leave = leave;
     }
 
     public String getWarning() {
@@ -28,4 +26,3 @@ public class LeaveResponse {
         this.warning = warning;
     }
 }
-

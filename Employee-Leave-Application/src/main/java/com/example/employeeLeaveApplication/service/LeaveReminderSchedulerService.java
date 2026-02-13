@@ -7,8 +7,9 @@ import com.example.employeeLeaveApplication.enums.Channel;
 import com.example.employeeLeaveApplication.enums.EventType;
 import com.example.employeeLeaveApplication.enums.LeaveStatus;
 import com.example.employeeLeaveApplication.repository.EmployeeRepository;
-import com.example.employeeLeaveApplication.repository.LeaveApplicationRepository;
 import com.example.employeeLeaveApplication.repository.LeaveReminderRepository;
+import com.example.employeeLeaveApplication.repository.LeaveApplicationRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;

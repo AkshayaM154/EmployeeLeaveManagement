@@ -3,14 +3,11 @@ package com.example.employeeLeaveApplication.entity;
 import com.example.employeeLeaveApplication.enums.HalfDayType;
 import com.example.employeeLeaveApplication.enums.LeaveStatus;
 import com.example.employeeLeaveApplication.enums.LeaveType;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import org.antlr.v4.runtime.misc.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,67 +18,75 @@ public class LeaveApplication {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    // =========================
+    // BASIC FIELDS
+    // =========================
+
+    @Column(nullable = false)
     private Long employeeId;
 
-    @Column(name = "lop_month")
-    private Integer month;
-
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private LeaveType leaveType;
 
     @Enumerated(EnumType.STRING)
-    private HalfDayType halfDayType ;
+    private HalfDayType halfDayType;
 
-    @NotNull
-    @Column(name = "allocation_year")
-    private Integer year;
-
-    @NotNull
+    @Column(nullable = false)
     private LocalDate startDate;
 
-    @NotNull
+    @Column(nullable = false)
     private LocalDate endDate;
 
+    @Column(nullable = false, precision = 5, scale = 2)
     private BigDecimal days;
 
     @Enumerated(EnumType.STRING)
-    private LeaveStatus status = LeaveStatus.PENDING;
+    @Column(nullable = false)
+    private LeaveStatus status;
 
-    @NotNull
+    @Column(length = 500)
     private String reason;
 
-    @Column(name = "created_at")
+    // =========================
+    // TRACKING
+    // =========================
+
+    @Column(name = "leave_year")   // ✅ FIXED
+    private Integer year;
+
+    private Integer lopMonth;
+
     private LocalDateTime createdAt;
 
-    // ==========================
-    // Lazy-safe JSON: ignore the back-reference
-    // ==========================
-    @OneToMany(mappedBy = "leaveApplication",
+    // =========================
+    // ATTACHMENTS
+    // =========================
+
+    @OneToMany(
+            mappedBy = "leaveApplication",
             cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    @JsonIgnoreProperties("leaveApplication")
-    private List<LeaveAttachment> attachments = new ArrayList<>();
+            fetch = FetchType.LAZY,
+            orphanRemoval = true
+    )
+    private List<LeaveAttachment> attachments;
 
-    // ==========================
-    // Auto-populate createdAt and year
-    // ==========================
+    // =========================
+    // AUTO SET CREATED TIME
+    // =========================
+
     @PrePersist
-    protected void onCreate() {
+    public void prePersist() {
         this.createdAt = LocalDateTime.now();
-        populateYear();
-    }
-
-    @PreUpdate
-    private void populateYear() {
         if (this.startDate != null) {
             this.year = this.startDate.getYear();
         }
     }
 
-    // ==========================
+    // =========================
     // GETTERS & SETTERS
-    // ==========================
+    // =========================
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -111,6 +116,9 @@ public class LeaveApplication {
 
     public Integer getYear() { return year; }
     public void setYear(Integer year) { this.year = year; }
+
+    public Integer getLopMonth() { return lopMonth; }
+    public void setLopMonth(Integer lopMonth) { this.lopMonth = lopMonth; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

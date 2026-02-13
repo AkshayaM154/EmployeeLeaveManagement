@@ -5,9 +5,9 @@ import com.example.employeeLeaveApplication.entity.Employee;
 import com.example.employeeLeaveApplication.entity.LeaveApplication;
 import com.example.employeeLeaveApplication.entity.LeaveApproval;
 import com.example.employeeLeaveApplication.enums.*;
+import com.example.employeeLeaveApplication.repository.LeaveApplicationRepository;
 import com.example.employeeLeaveApplication.repository.LeaveApprovalRepository;
 import com.example.employeeLeaveApplication.repository.EmployeeRepository;
-import com.example.employeeLeaveApplication.repository.LeaveApplicationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

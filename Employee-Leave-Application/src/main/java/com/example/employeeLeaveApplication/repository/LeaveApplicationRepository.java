@@ -13,16 +13,41 @@ import java.util.List;
 @Repository
 public interface LeaveApplicationRepository extends JpaRepository<LeaveApplication, Long> {
 
-    // Fixed: Added the missing method DashboardService is looking for
     int countByEmployeeIdInAndStatus(List<Long> employeeIds, LeaveStatus status);
 
+    // ===============================
+    // ✅ BASIC FIND (Needed by DashboardService)
+    // ===============================
     List<LeaveApplication> findByEmployeeId(Long employeeId);
 
+    // ===============================
+    // ✅ FETCH JOIN — Fix Lazy Error
+    // ===============================
+
+    @Query("""
+        SELECT DISTINCT l
+        FROM LeaveApplication l
+        LEFT JOIN FETCH l.attachments
+        WHERE l.employeeId = :employeeId
+    """)
+    List<LeaveApplication> findByEmployeeIdWithAttachments(
+            @Param("employeeId") Long employeeId
+    );
+
+    @Query("""
+        SELECT DISTINCT l
+        FROM LeaveApplication l
+        LEFT JOIN FETCH l.attachments
+    """)
+    List<LeaveApplication> findAllWithAttachments();
+
+    // ===============================
 
     List<LeaveApplication> findByEmployeeIdInAndStatus(
             List<Long> employeeIds,
             LeaveStatus status
     );
+
     List<LeaveApplication> findByStatus(LeaveStatus status);
 
     @Query("""
@@ -55,7 +80,8 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
     );
 
     @Query("""
-        SELECT l FROM LeaveApplication l
+        SELECT l
+        FROM LeaveApplication l
         WHERE l.employeeId = :employeeId
           AND l.status = :status
           AND YEAR(l.startDate) = :year
@@ -80,7 +106,8 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
     );
 
     @Query("""
-        SELECT l FROM LeaveApplication l
+        SELECT l
+        FROM LeaveApplication l
         WHERE l.employeeId = :empId
           AND l.status IN (:pending, :approved)
           AND l.startDate <= :endDate

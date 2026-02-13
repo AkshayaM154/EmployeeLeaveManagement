@@ -1,9 +1,11 @@
 package com.example.employeeLeaveApplication.controller;
 
+import com.example.employeeLeaveApplication.dto.LeaveApplicationDTO;
 import com.example.employeeLeaveApplication.dto.LeaveResponse;
 import com.example.employeeLeaveApplication.entity.LeaveApplication;
 import com.example.employeeLeaveApplication.entity.LeaveAttachment;
 import com.example.employeeLeaveApplication.enums.HalfDayType;
+import com.example.employeeLeaveApplication.enums.LeaveStatus;
 import com.example.employeeLeaveApplication.enums.LeaveType;
 import com.example.employeeLeaveApplication.service.LeaveAllocationService;
 import com.example.employeeLeaveApplication.service.LeaveApplicationService;
@@ -34,8 +36,10 @@ public class LeaveApplicationController {
     private final LeaveApplicationService leaveApplicationService;
     private final LeaveAllocationService leaveAllocationService;
 
-    public LeaveApplicationController(LeaveApplicationService leaveApplicationService,
-                                      LeaveAllocationService leaveAllocationService){
+    public LeaveApplicationController(
+            LeaveApplicationService leaveApplicationService,
+            LeaveAllocationService leaveAllocationService) {
+
         this.leaveApplicationService = leaveApplicationService;
         this.leaveAllocationService = leaveAllocationService;
     }
@@ -72,7 +76,7 @@ public class LeaveApplicationController {
         leave.setStartDate(startDate);
         leave.setEndDate(endDate);
         leave.setReason(reason);
-        leave.setStatus(com.example.employeeLeaveApplication.enums.LeaveStatus.PENDING);
+        leave.setStatus(LeaveStatus.PENDING);
 
         if (halfDayType != null && !halfDayType.isEmpty()) {
             leave.setHalfDayType(HalfDayType.valueOf(halfDayType.toUpperCase()));
@@ -80,6 +84,7 @@ public class LeaveApplicationController {
 
         // Process attachments
         if (files != null && files.length > 0) {
+
             Path uploadPath = Paths.get(uploadDir);
             Files.createDirectories(uploadPath);
 
@@ -88,36 +93,46 @@ public class LeaveApplicationController {
             int port = request.getServerPort();
 
             List<LeaveAttachment> attachments = new ArrayList<>();
+
             for (MultipartFile file : files) {
+
                 if (file.isEmpty()) continue;
+
                 String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
                 Files.write(uploadPath.resolve(uniqueName), file.getBytes());
 
-                String encodedName = URLEncoder.encode(uniqueName, StandardCharsets.UTF_8).replace("+", "%20");
-                String fullUrl = String.format("http://%s:%d/api/files/download/%s", hostname, port, encodedName);
+                String encodedName =
+                        URLEncoder.encode(uniqueName, StandardCharsets.UTF_8)
+                                .replace("+", "%20");
+
+                String fullUrl = String.format(
+                        "http://%s:%d/api/files/download/%s",
+                        hostname,
+                        port,
+                        encodedName
+                );
 
                 LeaveAttachment attachment = new LeaveAttachment();
                 attachment.setFileUrl(fullUrl);
                 attachment.setLeaveApplication(leave);
+
                 attachments.add(attachment);
             }
+
             leave.setAttachments(attachments);
         }
 
-        LeaveResponse response = leaveApplicationService.applyLeave(leave, confirmLossOfPay);
-
-        // Avoid recursive reference in JSON
-        if (response.getLeaveApplication() != null && response.getLeaveApplication().getAttachments() != null) {
-            response.getLeaveApplication().getAttachments().forEach(a -> a.setLeaveApplication(null));
-        }
-        return response;
+        // 🔥 Just call service and return DTO-based response
+        return leaveApplicationService.applyLeave(leave, confirmLossOfPay);
     }
 
     // ========================
     // GET LEAVES FOR EMPLOYEE
     // ========================
     @GetMapping("/employee/{employeeId}")
-    public List<LeaveApplication> getEmployeeLeaves(@PathVariable Long employeeId) {
+    public List<LeaveApplicationDTO> getEmployeeLeaves(
+            @PathVariable Long employeeId) {
+
         return leaveApplicationService.getLeavesByEmployee(employeeId);
     }
 
@@ -136,8 +151,20 @@ public class LeaveApplicationController {
     // CANCEL LEAVE (ADMIN)
     // ========================
     @PostMapping("/cancel/admin")
-    public LeaveResponse cancelAdminLeave(@RequestParam Long applicationId) {
+    public LeaveResponse cancelAdminLeave(
+            @RequestParam Long applicationId) {
+
         return leaveApplicationService.cancelAdminLeave(applicationId);
+    }
+
+    @GetMapping("/all")
+    public List<LeaveApplicationDTO> getAllLeaves() {
+        return leaveApplicationService.getAllLeaves();
+    }
+    @GetMapping("/{employeeId}")
+    public List<LeaveApplicationDTO> getLeavesByEmployee(
+            @PathVariable Long employeeId) {
+        return leaveApplicationService.getLeavesByEmployee(employeeId);
     }
 
 }
