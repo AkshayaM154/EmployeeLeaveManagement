@@ -101,7 +101,7 @@ public class LeaveApplicationService {
             );
         }
 
-        notifyNextApproverSafe(savedLeave);
+        notifyManager(savedLeave);
 
         return new LeaveResponse(mapToDTO(savedLeave), warning);
     }
@@ -272,38 +272,24 @@ public class LeaveApplicationService {
         return BigDecimal.ONE;
     }
 
-    private void notifyNextApproverSafe(LeaveApplication leave) {
+    private void notifyManager(LeaveApplication leave) {
 
-        Employee applicant =
-                employeeRepository.findById(leave.getEmployeeId()).orElse(null);
+        Employee employee = employeeRepository.findById(leave.getEmployeeId())
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        Employee manager = employeeRepository.findById(employee.getManagerId())
+                .orElseThrow(() -> new RuntimeException("Manager not found"));
 
-        if (applicant == null) return;
-
-        Employee nextApprover = null;
-
-        if (applicant.getRole() == Role.EMPLOYEE &&
-                applicant.getManagerId() != null) {
-            nextApprover =
-                    employeeRepository.findById(applicant.getManagerId()).orElse(null);
-        } else if (applicant.getRole() == Role.MANAGER ||
-                applicant.getRole() == Role.ADMIN) {
-            nextApprover =
-                    employeeRepository.findByRole(Role.HR).orElse(null);
-        }
-
-        if (nextApprover != null) {
-            notificationService.createNotification(
-                    nextApprover.getId(),
-                    nextApprover.getEmail(),
-                    EventType.LEAVE_APPLIED,
-                    nextApprover.getRole(),
-                    Channel.EMAIL,
-                    applicant.getName() +
-                            " applied leave from " +
-                            leave.getStartDate() +
-                            " to " +
-                            leave.getEndDate()
-            );
-        }
+        notificationService.createNotification(
+                manager.getId(),
+                manager.getEmail(),
+                EventType.LEAVE_APPLIED,
+                manager.getRole(),
+                Channel.EMAIL,
+                "Employee " + employee.getName() +
+                        " applied leave from " +
+                        leave.getStartDate() +
+                        " to " +
+                        leave.getEndDate()
+        );
     }
 }
